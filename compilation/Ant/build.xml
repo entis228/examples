@@ -17,11 +17,9 @@
         <mkdir dir="build/jar"/>
         <jar destfile="build/jar/Office.jar" basedir="build/classes">
             <manifest>
-                <attribute name="Main-Class" value="com.entis.Main"/>
+                <attribute name="Main-Class" value="com.entis.app.Main"/>
                 <attribute name="Class-Path" value="libs/commons-lang3-3.11.jar" />
                 <attribute name="Class-Path1" value="libs/activation-1.1.jar"/>
-                <attribute name="Class-Path2" value="libs/commons-email-1.5.jar"/>
-                <attribute name="Class-Path3" value="libs/mail-1.4.jar"/>
             </manifest>
             <zipgroupfileset dir="libs" includes="*.jar"/>
         </jar>

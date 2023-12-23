@@ -1,11 +1,10 @@
-package com.entis;
-
-import org.apache.commons.mail.EmailException;
+package com.entis.app;
 
 import java.io.IOException;
+import org.apache.commons.lang3.StringUtils;
 
 public class Main{
-    public static void main(String[] args) throws IOException, EmailException {
+    public static void main(String[] args) throws IOException {
         Worker worker = new Worker();
         java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.InputStreamReader(System.in));
         System.out.println("Enter info about Worker");
@@ -13,15 +12,6 @@ public class Main{
         System.out.print("\nName: ");worker.setName(reader.readLine());
         System.out.print("\nRank: ");worker.setRank(reader.readLine());
         System.out.println("\nYour worker is:\n"+worker);
-        System.out.println("Would you like to notificate him? yes/no");
-        if(reader.readLine().equals("yes")){
-            System.out.println("Write email");
-            String email = reader.readLine();
-            EmailSender.SendHello(email);
-            System.out.println("Email was sent");
-        }else {
-            System.out.println("Thank you");
-        }
         System.out.println("Good bye");
         reader.readLine();
     }

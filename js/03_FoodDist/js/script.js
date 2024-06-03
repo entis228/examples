@@ -146,7 +146,7 @@ const modal = () => {
     window.addEventListener('scroll', onScroll);
 
     const thanksModal = (message) => {
-        if(!modalWindow.classList.contains('show')) {
+        if (!modalWindow.classList.contains('show')) {
             openModalWindow();
         }
         const dialog = document.querySelector('.modal__dialog');
@@ -173,28 +173,6 @@ const modal = () => {
             error: "Произошла ошибка."
         }
 
-        // const sendAsMultipart = (form) => {
-        //     const request = new XMLHttpRequest();
-        //     request.open('POST', 'http://localhost:8080/multipartData');
-        //     const formData = new FormData(form);
-        //     request.send(formData);
-        //
-        //     return request;
-        // }
-
-        const sendAsJson = (form) => {
-            const request = new XMLHttpRequest();
-            request.open('POST', 'http://localhost:8080/json');
-            request.setRequestHeader("content-type", "application/json");
-            const formData = new FormData(form);
-            const body = {};
-            formData.forEach((value, key) => {
-                body[key] = value;
-            });
-            request.send(JSON.stringify(body));
-            return request;
-        }
-
         forms.forEach(form => {
             form.addEventListener('submit', (event) => {
                 event.preventDefault();
@@ -202,22 +180,74 @@ const modal = () => {
                 const spinner = document.createElement("img");
                 spinner.classList.add('spinner');
                 spinner.setAttribute('src', messages.loading);
-                form.append(spinner);
+                spinner.style.cssText = `
+                display: block;
+                margin: 0 auto;
+            `;
+                form.insertAdjacentElement('afterend', spinner);
+
+                // FETCH
+                const formData = new FormData(form);
+                const body = {};
+                formData.forEach((value, key) => {
+                    body[key] = value;
+                });
+                fetch("http://localhost:8080/json", {
+                    mode: "no-cors",
+                    method: 'POST',
+                    body: JSON.stringify(body),
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }).then(response => {
+                    return response.json()
+                }).then(response => {
+                    console.log(response);
+                    thanksModal(messages.ok);
+                }).catch(() => {
+                    thanksModal(messages.error);
+                }).finally(() => {
+                    spinner.remove();
+                    form.reset();
+                });
+
+                // XML HTTP request
+                // const sendAsMultipart = (form) => {
+                //     const request = new XMLHttpRequest();
+                //     request.open('POST', 'http://localhost:8080/multipartData');
+                //     const formData = new FormData(form);
+                //     request.send(formData);
+                //
+                //     return request;
+                // }
+
+                // const sendAsJson = (form) => {
+                //     const request = new XMLHttpRequest();
+                //     request.open('POST', 'http://localhost:8080/json');
+                //     request.setRequestHeader("content-type", "application/json");
+                //     const formData = new FormData(form);
+                //     const body = {};
+                //     formData.forEach((value, key) => {
+                //         body[key] = value;
+                //     });
+                //     request.send(JSON.stringify(body));
+                //     return request;
+                // }
 
                 // const request = sendAsMultipart(form);
-                const request = sendAsJson(form);
+                // const request = sendAsJson(form);
 
-                request.addEventListener("load", () => {
-                    spinner.remove();
-                    if (request.status === 200) {
-                        console.log(request.response);
-                        thanksModal(messages.ok);
-                        form.reset();
-                        setTimeout(() => spinner.remove(), 2000);
-                    } else {
-                        thanksModal(messages.error);
-                    }
-                })
+                // request.addEventListener("load", () => {
+                //     spinner.remove();
+                //     if (request.status === 200) {
+                //         console.log(request.response);
+                //         thanksModal(messages.ok);
+                //         form.reset();
+                //         setTimeout(() => spinner.remove(), 2000);
+                //     } else {
+                //         thanksModal(messages.error);
+                //     }
+                // })
             });
         });
     }

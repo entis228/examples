@@ -3,7 +3,6 @@ document.addEventListener("DOMContentLoaded", function () {
     timer();
     modal();
     menus();
-    processForms();
 });
 
 const tabs = () => {
@@ -145,6 +144,85 @@ const modal = () => {
     setTimeout(openModalWindow, 3000);
 
     window.addEventListener('scroll', onScroll);
+
+    const thanksModal = (message) => {
+        if(!modalWindow.classList.contains('show')) {
+            openModalWindow();
+        }
+        const dialog = document.querySelector('.modal__dialog');
+        const content = dialog.querySelector('.modal__content');
+        content.classList.add('hide');
+        const newContent = document.createElement('div');
+        newContent.classList.add('modal__content');
+        newContent.innerHTML = `<div data-close class="modal__close">&times;</div>
+                            <div class="modal__title">${message}</div>`;
+        dialog.append(newContent);
+        setTimeout(() => {
+            newContent.remove();
+            content.classList.remove('hide');
+            closeModalWindow();
+        }, 2000);
+    }
+
+    const processForms = () => {
+        const forms = document.querySelectorAll('form');
+
+        const messages = {
+            loading: "img/spinner/spinner.svg",
+            ok: "Запрос был удачно отправлен.",
+            error: "Произошла ошибка."
+        }
+
+        // const sendAsMultipart = (form) => {
+        //     const request = new XMLHttpRequest();
+        //     request.open('POST', 'http://localhost:8080/multipartData');
+        //     const formData = new FormData(form);
+        //     request.send(formData);
+        //
+        //     return request;
+        // }
+
+        const sendAsJson = (form) => {
+            const request = new XMLHttpRequest();
+            request.open('POST', 'http://localhost:8080/json');
+            request.setRequestHeader("content-type", "application/json");
+            const formData = new FormData(form);
+            const body = {};
+            formData.forEach((value, key) => {
+                body[key] = value;
+            });
+            request.send(JSON.stringify(body));
+            return request;
+        }
+
+        forms.forEach(form => {
+            form.addEventListener('submit', (event) => {
+                event.preventDefault();
+                const form = event.target;
+                const spinner = document.createElement("img");
+                spinner.classList.add('spinner');
+                spinner.setAttribute('src', messages.loading);
+                form.append(spinner);
+
+                // const request = sendAsMultipart(form);
+                const request = sendAsJson(form);
+
+                request.addEventListener("load", () => {
+                    spinner.remove();
+                    if (request.status === 200) {
+                        console.log(request.response);
+                        thanksModal(messages.ok);
+                        form.reset();
+                        setTimeout(() => spinner.remove(), 2000);
+                    } else {
+                        thanksModal(messages.error);
+                    }
+                })
+            });
+        });
+    }
+
+    processForms();
 }
 
 const menus = () => {
@@ -184,67 +262,9 @@ const menus = () => {
         new MenuItem("img/tabs/vegy.jpg", "vegy", 'Меню "Фитнес"', 'Меню "Фитнес" - это новый подход к приготовлению блюд: больше свежих овощей и фруктов. Продукт активных и здоровых людей. Это абсолютно новый продукт с оптимальной ценой и высоким качеством!', "229"),
         new MenuItem("img/tabs/elite.jpg", "elite", 'Меню "Премиум"', 'В меню “Премиум” мы используем не только красивый дизайн упаковки, но и качественное исполнение блюд. Красная рыба, морепродукты, фрукты - ресторанное меню без похода в ресторан!', "550"),
         new MenuItem("img/tabs/post.jpg", "post", 'Меню "Постное"', 'Меню “Постное” - это тщательный подбор ингредиентов: полное отсутствие продуктов животного происхождения, молоко из миндаля, овса, кокоса или гречки, правильное количество белков за счет тофу и импортных вегетарианских стейков.', "430"),
-        new MenuItem("img/tabs/vegy.jpg", "super", 'Меню "Мастершеф"', "Блюда высокой кухни", "700")
+        new MenuItem("img/tabs/masterchef.jpg", "super", 'Меню "Мастершеф"', "Блюда высокой кухни", "700")
     ];
     items.forEach(item => {
         item.render(itemContainer);
-    });
-}
-
-const processForms = () => {
-    const forms = document.querySelectorAll('form');
-
-    const messages = {
-        loading: "Загрузка...",
-        ok: "Запрос был удачно отправлен.",
-        error: "Произошла ошибка."
-    }
-
-    // const sendAsMultipart = (form) => {
-    //     const request = new XMLHttpRequest();
-    //     request.open('POST', 'http://localhost:8080/multipartData');
-    //     const formData = new FormData(form);
-    //     request.send(formData);
-    //
-    //     return request;
-    // }
-
-    const sendAsJson = (form) => {
-        const request = new XMLHttpRequest();
-        request.open('POST', 'http://localhost:8080/json');
-        request.setRequestHeader("content-type", "application/json");
-        const formData = new FormData(form);
-        const body = {};
-        formData.forEach((value, key) => {
-            body[key] = value;
-        });
-        request.send(JSON.stringify(body));
-        return request;
-    }
-
-    forms.forEach(form => {
-        form.addEventListener('submit', (event) => {
-            event.preventDefault();
-            const form = event.target;
-            document.querySelector(".statusMessage")?.remove();
-            const statusMessage = document.createElement("div");
-            statusMessage.classList.add('statusMessage');
-            statusMessage.textContent = messages.loading;
-            form.append(statusMessage);
-
-            // const request = sendAsMultipart(form);
-            const request = sendAsJson(form);
-
-            request.addEventListener("load", () => {
-                if (request.status === 200) {
-                    console.log(request.response);
-                    statusMessage.textContent = messages.ok;
-                    form.reset();
-                    setTimeout(() => statusMessage.remove(), 2000);
-                } else {
-                    statusMessage.textContent = messages.error;
-                }
-            })
-        });
     });
 }
